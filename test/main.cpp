@@ -308,7 +308,7 @@ int main()
         std::cout << std::endl;
     }
 
-    std::cout << "Testing complete.\n";
+    std::cout << "Testing complete.\nInput something to exit: ";
 
     char c = 0;
     std::cin >> c;

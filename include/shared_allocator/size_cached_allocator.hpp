@@ -226,9 +226,9 @@ namespace salloc {
         /** \brief Truly deallocates memory.
 
         \param _memory Pointer to allocated memory. */
-        inline void deallocate_force(pointer _memory) const
+        inline void deallocate_force(pointer _memory, size_type = 0) const
         {
-            m_allocator.deallocate(pMem);
+            m_allocator.deallocate(_memory);
         }
 
         /** \brief Allocate array of elements.

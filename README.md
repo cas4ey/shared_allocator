@@ -49,3 +49,6 @@ int main()
     stored in one list and 5 pointers of size 60 will be stored in another list).
     It is not recommended to use this allocator with individual containers, it is better to share this allocator between several
     containers at once.
+
+# LICENSE
+SharedAllocator is licensed under terms of GNU GPL v3 (see file LICENSE), but I plan to add other licenses in the near future (LGPL or MIT license maybe). Send me a message if you are interested.

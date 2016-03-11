@@ -36,7 +36,7 @@ int main()
 
 ### allocators
 - **salloc::shared_allocator** is simple allocator that allocates and deallocates memory using imported functions `shared_allocate`
-    and `shared_deallocate`. All instances of this allocator will allocated and deallocate memory inside one heap.
+    and `shared_deallocate`. All instances of this allocator will allocate and deallocate memory inside one heap.
 - **salloc::cached_allocator** is allocator that caches deallocated memory (stores pointers to previously allocated memory for further usage).
     So if you allocating and deallocating memory buffers **of the same size** rapidly you will have a very small number
     of real memory allocations, because once allocated, this memory buffer will be reused for many times.

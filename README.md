@@ -4,6 +4,9 @@ to share STL containers between several shared libraries.
 SharedAllocator interface is similar to `std::allocator` interface
 so `std::allocator` can be easily replaced by `salloc::shared_allocator` (or by other `salloc::` allocators).
 
+### compiling
+SharedAllocator is using features of C++11 standard, so you have to use C++11 compatible compiler.
+
 ### adding shared_allocator to your project with CMake
 1. Copy files `include/shared_allocator/*.*` to your include directory 
     (for example, `include/third_party/shared_allocator` or just `include/shared_allocator`).

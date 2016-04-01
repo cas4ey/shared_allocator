@@ -55,13 +55,11 @@ namespace salloc {
     {
     protected:
 
-        template <class U>
-        using TSameAlloc = typename TAlloc::template rebind<U>::other;
+        typedef cached_allocator<T, TAlloc> ThisType;
+        typedef ::std::vector<T*, typename TAlloc::template rebind<T*>::other> MemoryCache;
 
-        typedef ::std::vector<T*, TSameAlloc<T*> > MemoryCache;
-
-        MemoryCache  m_memoryCache; ///< Memory cache of objects
-        const TAlloc   m_allocator; ///< Allocator to allocate new instances of T
+        MemoryCache m_memoryCache; ///< Memory cache of objects
+        TAlloc        m_allocator; ///< Allocator to allocate new instances of T
 
     public:
 
@@ -82,7 +80,7 @@ namespace salloc {
         template <class U>
         struct rebind
         {
-            typedef cached_allocator<U> other;
+            typedef cached_allocator<U, typename TAlloc::template rebind<U>::other> other;
         };
 
         /** \brief Returns an actual adress of value.
@@ -112,14 +110,14 @@ namespace salloc {
 
         Does nothing. */
         template <class U>
-        cached_allocator(const cached_allocator<U>&) throw()
+        cached_allocator(const U&) throw()
         {
         }
 
         /** \brief Move constructor.
 
         Moves reserved memory. */
-        cached_allocator(cached_allocator<T>&& _rvalueAlloc) : m_memoryCache(::std::move(_rvalueAlloc.m_memoryCache))
+        cached_allocator(ThisType&& _rvalueAlloc) : m_memoryCache(::std::move(_rvalueAlloc.m_memoryCache))
         {
         }
 
@@ -127,23 +125,29 @@ namespace salloc {
 
         Does nothing and returns reference to this allocator. */
         template <class U>
-        cached_allocator<T>& operator=(const cached_allocator<U>&)
+        ThisType& operator=(const U&)
         {
             return *this;
         }
 
         ~cached_allocator()
         {
-            for (auto pMem : m_memoryCache)
-            {
-                m_allocator.deallocate(pMem);
-            }
+            private_clear();
+        }
+
+        /** \brief Clear memory cache.
+        
+        Also deallocates all cached memory. */
+        void clear()
+        {
+            private_clear();
+            m_memoryCache.clear();
         }
 
         /** \brief Swaps two allocators with their cache.
 
         \param _anotherAlloc Reference to another allocator. */
-        void swap(cached_allocator<T>& _anotherAlloc)
+        void swap(ThisType& _anotherAlloc)
         {
             m_memoryCache.swap(_anotherAlloc.m_memoryCache);
         }
@@ -187,9 +191,9 @@ namespace salloc {
         /** \brief Truly deallocates memory.
 
         \param _memory Pointer to allocated memory. */
-        inline void deallocate_force(pointer _memory, size_type = 0) const
+        inline void deallocate_force(pointer _memory, size_type = 0)
         {
-            m_allocator.deallocate(_memory);
+            m_allocator.deallocate(_memory, 0);
         }
 
         /** \brief Allocate elements.
@@ -211,7 +215,7 @@ namespace salloc {
 
         \param _number Required number of elements.
         \param _currentMemory Pointer to memory allocated earlier (it contains size which will be used as a hint). */
-        pointer allocate(size_type _number, void* _currentMemory) const
+        pointer allocate(size_type _number, void* _currentMemory)
         {
             if (!m_memoryCache.empty())
             {
@@ -226,9 +230,9 @@ namespace salloc {
         /** \brief Construct new object on preallocated memory using default constructor.
 
         \param _singleObject Pointer to preallocated memory. */
-        inline void construct(T* _singleObject) const
+        inline void construct(T* _singleObject)
         {
-            shared_construct(_singleObject);
+            m_allocator.construct(_singleObject);
         }
 
         /** \brief Construct new object on preallocated memory using copy-constructor.
@@ -239,9 +243,9 @@ namespace salloc {
         \note Declared as template function to make it possible to use this allocator with
         types without public copy-constructor. */
         template <class U>
-        inline void construct(U* _singleObject, const U& _value) const
+        inline void construct(U* _singleObject, const U& _value)
         {
-            shared_construct(_singleObject, _value);
+            m_allocator.construct(_singleObject, _value);
         }
 
         /** \brief Construct new object on preallocated memory using move-constructor.
@@ -252,9 +256,9 @@ namespace salloc {
         \note Declared as template function to make it possible to use this allocator with
         types without public move-constructor. */
         template <class U>
-        inline void construct(U* _singleObject, U&& _value) const
+        inline void construct(U* _singleObject, U&& _value)
         {
-            shared_construct(_singleObject, _value);
+            m_allocator.construct(_singleObject, _value);
         }
 
         /** \brief Construct new object on preallocated memory using arguments list.
@@ -265,7 +269,7 @@ namespace salloc {
         \note Declared as template function to make it possible to use this allocator with
         types without specific constructor with arguments. */
         template <class U, class... TArgs>
-        inline void construct(U* _singleObject, TArgs&&... _constructorArguments) const
+        inline void construct(U* _singleObject, TArgs&&... _constructorArguments)
         {
             ::new (static_cast<void*>(_singleObject)) U(::std::forward<TArgs>(_constructorArguments)...);
         }
@@ -279,9 +283,9 @@ namespace salloc {
         \note Declared as template function to make it possible to use this allocator with
         types without public destructor. */
         template <class U>
-        inline void destroy(U* _singleObject) const
+        inline void destroy(U* _singleObject)
         {
-            _singleObject->~U();
+            m_allocator.destroy(_singleObject);
         }
 
         /** \brief Estimate maximum array size. */
@@ -290,20 +294,43 @@ namespace salloc {
             return (size_t)(-1) / sizeof(T);
         }
 
+    protected:
+
+        /** \brief Deallocates all memory stored in memory cache. */
+        inline void private_clear()
+        {
+            for (auto pMem : m_memoryCache)
+            {
+                m_allocator.deallocate(pMem, 0);
+            }
+        }
+
     }; // END class single_cached_allocator<T>.
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Using single_cached_allocator for itself is restricted.
     template <class T, class U>
-    class cached_allocator<T, cached_allocator<U> >;
+    class cached_allocator<T, ::salloc::cached_allocator<U> >;
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <class T>
-    using local_cached_allocator = cached_allocator<T, std::allocator<T> >;
+    using local_cached_allocator = ::salloc::cached_allocator<T, ::std::allocator<T> >;
 
 } // END namespace salloc.
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+namespace std {
+
+    template <class T, class TAlloc>
+    inline void swap(::salloc::cached_allocator<T, TAlloc>& _left, ::salloc::cached_allocator<T, TAlloc>& _right)
+    {
+        _left.swap(_right);
+    }
+
+} // END namespace std.
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

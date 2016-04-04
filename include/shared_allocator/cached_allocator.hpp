@@ -109,6 +109,13 @@ namespace salloc {
         /** \brief Empty copy constructor.
 
         Does nothing. */
+        cached_allocator(const ThisType&) throw()
+        {
+        }
+
+        /** \brief Empty copy constructor.
+
+        Does nothing. */
         template <class U>
         cached_allocator(const U&) throw()
         {

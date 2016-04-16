@@ -54,4 +54,4 @@ int main()
     containers at once.
 
 # LICENSE
-SharedAllocator is licensed under terms of GNU GPL v3 (see file LICENSE), but I plan to add more permissive licenses in the near future (LGPL or MIT licenses maybe). Send me a message if you are interested.
+SharedAllocator is licensed under terms of MIT license.

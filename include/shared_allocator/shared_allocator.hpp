@@ -214,7 +214,7 @@ namespace salloc {
 
         Does nothing and returns reference to this allocator. */
         template <class U>
-        shared_allocator<T>& operator=(const shared_allocator<U>&)
+        shared_allocator<T>& operator=(const shared_allocator<U>&) throw()
         {
             return *this;
         }
@@ -324,6 +324,13 @@ namespace salloc {
     }; // END struct shared_allocator<T>.
 
 } // END namespace salloc.
+
+/** Operator == for STL compatibility. */
+template <class T, class U>
+inline bool operator == (const ::salloc::shared_allocator<T>&, const ::salloc::shared_allocator<U>&) throw()
+{
+    return true;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -337,6 +337,21 @@ namespace salloc {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/** Operator == for STL compatibility. */
+template <class T, class U>
+inline bool operator == (const ::salloc::cached_allocator<T, U>&, const ::salloc::cached_allocator<T, U>&) throw()
+{
+    return true;
+}
+
+template <class T, class U, class W, class Q>
+inline bool operator == (const ::salloc::cached_allocator<T, U>&, const ::salloc::cached_allocator<W, Q>&) throw()
+{
+    return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 namespace std {
 
     template <class T, class TAlloc>

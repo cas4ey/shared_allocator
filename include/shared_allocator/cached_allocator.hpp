@@ -273,7 +273,7 @@ namespace salloc {
         template <class U>
         inline void construct(U* _singleObject, U&& _value)
         {
-            m_allocator.construct(_singleObject, _value);
+            m_allocator.construct(_singleObject, ::std::forward<U&&>(_value));
         }
 
         /** \brief Construct new object on preallocated memory using arguments list.

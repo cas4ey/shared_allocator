@@ -62,6 +62,8 @@ namespace salloc {
     {
     protected:
 
+        typedef size_cached_allocator<T, TAlloc> ThisType;
+
         template <class U>
         using TSameAlloc = typename TAlloc::template rebind<U>::other;
 
@@ -120,8 +122,15 @@ namespace salloc {
         /** \brief Empty copy constructor.
 
         Does nothing. */
+        size_cached_allocator(const ThisType&) throw()
+        {
+        }
+
+        /** \brief Empty copy constructor.
+
+        Does nothing. */
         template <class U>
-        size_cached_allocator(const size_cached_allocator<U>&) throw()
+        size_cached_allocator(const U&) throw()
         {
         }
 
@@ -136,9 +145,22 @@ namespace salloc {
 
         Does nothing and returns reference to this allocator. */
         template <class U>
-        size_cached_allocator<T>& operator=(const size_cached_allocator<U>&)
+        size_cached_allocator<T>& operator = (const size_cached_allocator<U>&)
         {
             return *this;
+        }
+
+        /** Operator == for STL compatibility. */
+        inline bool operator == (const ThisType&) throw()
+        {
+            return true;
+        }
+
+        /** Operator == for STL compatibility. */
+        template <class U, class W>
+        inline bool operator == (const size_cached_allocator<U, W>&) throw()
+        {
+            return false;
         }
 
         ~size_cached_allocator()
@@ -350,19 +372,6 @@ namespace salloc {
     class size_cached_allocator<T, size_cached_allocator<U> >;
 
 } // END namespace salloc.
-
-/** Operator == for STL compatibility. */
-template <class T, class U>
-inline bool operator == (const ::salloc::size_cached_allocator<T, U>&, const ::salloc::size_cached_allocator<T, U>&) throw()
-{
-    return true;
-}
-
-template <class T, class U, class W, class Q>
-inline bool operator == (const ::salloc::size_cached_allocator<T, U>&, const ::salloc::size_cached_allocator<W, Q>&) throw()
-{
-    return false;
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

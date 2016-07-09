@@ -206,6 +206,13 @@ namespace salloc {
         /** \brief Empty copy constructor.
 
         Does nothing. */
+        shared_allocator(const other&) throw()
+        {
+        }
+
+        /** \brief Empty copy constructor.
+
+        Does nothing. */
         template <class U>
         shared_allocator(const shared_allocator<U>&) throw()
         {
@@ -218,6 +225,19 @@ namespace salloc {
         shared_allocator<T>& operator=(const shared_allocator<U>&) throw()
         {
             return *this;
+        }
+
+        /** Operator == for STL compatibility. */
+        inline bool operator == (const other&) throw()
+        {
+            return true;
+        }
+
+        /** Operator == for STL compatibility. */
+        template <class U>
+        inline bool operator == (const shared_allocator<U>&) throw()
+        {
+            return true;
         }
 
         /** \brief Returns number of elements in allocated memory.
@@ -325,13 +345,6 @@ namespace salloc {
     }; // END struct shared_allocator<T>.
 
 } // END namespace salloc.
-
-/** Operator == for STL compatibility. */
-template <class T, class U>
-inline bool operator == (const ::salloc::shared_allocator<T>&, const ::salloc::shared_allocator<U>&) throw()
-{
-    return true;
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
